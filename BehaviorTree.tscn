@@ -1,0 +1,81 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://actions/eat.gd" type="Script" id=1]
+[ext_resource path="res://actions/work.gd" type="Script" id=2]
+[ext_resource path="res://conditions/can_afford_food.gd" type="Script" id=3]
+[ext_resource path="res://conditions/sated.gd" type="Script" id=4]
+[ext_resource path="res://conditions/has_food.gd" type="Script" id=5]
+[ext_resource path="res://addons/godot-behavior-tree-plugin/selector.gd" type="Script" id=6]
+[ext_resource path="res://addons/godot-behavior-tree-plugin/sequence.gd" type="Script" id=7]
+[ext_resource path="res://addons/godot-behavior-tree-plugin/behavior_tree.gd" type="Script" id=8]
+[ext_resource path="res://actions/hunt.gd" type="Script" id=9]
+[ext_resource path="res://addons/godot-behavior-tree-plugin/repeat_until_fail.gd" type="Script" id=10]
+[ext_resource path="res://actions/buy_food.gd" type="Script" id=11]
+[ext_resource path="res://conditions/hungry.gd" type="Script" id=12]
+[ext_resource path="res://addons/godot-behavior-tree-plugin/inverter.gd" type="Script" id=13]
+
+[node name="BehaviorTree" type="Node"]
+script = ExtResource( 8 )
+
+[node name="Life" type="Node" parent="."]
+script = ExtResource( 6 )
+
+[node name="SatisfyHunger" type="Node" parent="Life"]
+script = ExtResource( 7 )
+
+[node name="IsHungry" type="Node" parent="Life/SatisfyHunger"]
+script = ExtResource( 12 )
+
+[node name="GetFoodIfNeeded" type="Node" parent="Life/SatisfyHunger"]
+script = ExtResource( 7 )
+
+[node name="Inverter" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded"]
+script = ExtResource( 13 )
+
+[node name="HasFood" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded/Inverter"]
+script = ExtResource( 5 )
+
+[node name="GetFood" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded"]
+script = ExtResource( 6 )
+
+[node name="BuyFood" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded/GetFood"]
+script = ExtResource( 7 )
+
+[node name="BuyFoodUntilBroke" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded/GetFood/BuyFood"]
+script = ExtResource( 10 )
+
+[node name="BehaviorSequence" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded/GetFood/BuyFood/BuyFoodUntilBroke"]
+script = ExtResource( 7 )
+
+[node name="CanAffordFood" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded/GetFood/BuyFood/BuyFoodUntilBroke/BehaviorSequence"]
+script = ExtResource( 3 )
+
+[node name="BuyFood" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded/GetFood/BuyFood/BuyFoodUntilBroke/BehaviorSequence"]
+script = ExtResource( 11 )
+
+[node name="HasFood" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded/GetFood/BuyFood"]
+script = ExtResource( 5 )
+
+[node name="Hunt" type="Node" parent="Life/SatisfyHunger/GetFoodIfNeeded/GetFood"]
+script = ExtResource( 9 )
+
+[node name="EatUntilFullOrNoFood" type="Node" parent="Life/SatisfyHunger"]
+script = ExtResource( 10 )
+
+[node name="EatSequence" type="Node" parent="Life/SatisfyHunger/EatUntilFullOrNoFood"]
+script = ExtResource( 7 )
+
+[node name="Inverter" type="Node" parent="Life/SatisfyHunger/EatUntilFullOrNoFood/EatSequence"]
+script = ExtResource( 13 )
+
+[node name="Sated" type="Node" parent="Life/SatisfyHunger/EatUntilFullOrNoFood/EatSequence/Inverter"]
+script = ExtResource( 4 )
+
+[node name="HasFood" type="Node" parent="Life/SatisfyHunger/EatUntilFullOrNoFood/EatSequence"]
+script = ExtResource( 5 )
+
+[node name="Eat" type="Node" parent="Life/SatisfyHunger/EatUntilFullOrNoFood/EatSequence"]
+script = ExtResource( 1 )
+
+[node name="Work" type="Node" parent="Life"]
+script = ExtResource( 2 )
